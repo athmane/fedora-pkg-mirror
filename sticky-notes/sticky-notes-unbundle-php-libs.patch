@@ -1,0 +1,43 @@
+diff -ru sticky-notes-0.4/classes/class_email.php sticky-notes-0.4.unbundled/classes/class_email.php
+--- sticky-notes-0.4/classes/class_email.php	2013-07-12 20:12:48.000000000 +0100
++++ sticky-notes-0.4.unbundled/classes/class_email.php	2013-07-13 01:45:09.393153764 +0100
+@@ -20,7 +20,7 @@
+         global $config, $core;
+ 
+         // Referene the SwiftMailer library
+-        require_once "{$core->root_dir}addons/swiftmailer/swift_required.php";
++        require_once "Swift/swift_required.php";
+ 
+         // Create the Transport
+         $transport = Swift_SmtpTransport::newInstance($config->smtp_host, $config->smtp_port);
+diff -ru sticky-notes-0.4/classes/class_skin.php sticky-notes-0.4.unbundled/classes/class_skin.php
+--- sticky-notes-0.4/classes/class_skin.php	2013-07-12 20:12:48.000000000 +0100
++++ sticky-notes-0.4.unbundled/classes/class_skin.php	2013-07-13 01:31:35.274153764 +0100
+@@ -274,7 +274,7 @@
+     // Instantiates GeSHi with default settings
+     function geshi($code, $language)
+     {
+-        require_once "addons/geshi/geshi.php";
++        require_once "geshi.php";
+ 
+         $geshi = new GeSHi($code, $language);
+         $geshi->enable_line_numbers(GESHI_FANCY_LINE_NUMBERS, 2);
+@@ -465,4 +465,4 @@
+     }
+ }
+ 
+-?>
+\ No newline at end of file
++?>
+diff -ru sticky-notes-0.4/list.php sticky-notes-0.4.unbundled/list.php
+--- sticky-notes-0.4/list.php	2013-07-12 20:12:48.000000000 +0100
++++ sticky-notes-0.4.unbundled/list.php	2013-07-13 03:09:37.798153764 +0100
+@@ -10,7 +10,7 @@
+ 
+ // Invoke required files
+ include_once('init.php');
+-include_once('addons/geshi/geshi.php');
++include_once('geshi.php');
+ 
+ // Collect some data
+ $project = $core->variable('project', '');

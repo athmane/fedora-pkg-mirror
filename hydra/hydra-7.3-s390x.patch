@@ -1,0 +1,14 @@
+diff -up hydra-7.3/configure.s390x hydra-7.3/configure
+--- hydra-7.3/configure.s390x	2012-12-22 10:22:12.000000000 +0100
++++ hydra-7.3/configure	2012-12-22 10:23:54.000000000 +0100
+@@ -39,6 +39,10 @@ if [ "$SYSS" = "Linux" -o "$SYSS" = "Ope
+     SIXFOUR=64
+     echo Detected 64 Bit $SYSS OS
+   fi
++  if [ `uname -m` = "s390x" ]; then
++    SIXFOUR=64
++    echo Detected 64 Bit $SYSS OS
++  fi
+ fi
+ PREFIX=""
+ NOSTRIP=""

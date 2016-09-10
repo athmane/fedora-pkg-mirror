@@ -1,0 +1,11 @@
+--- setup.py.orig	2015-06-20 16:59:16.472516296 +0100
++++ setup.py	2015-06-20 16:59:31.252637868 +0100
+@@ -45,7 +45,7 @@
+     url='http://fabfile.org',
+     packages=find_packages(),
+     test_suite='nose.collector',
+-    tests_require=['nose', 'fudge<1.0', 'jinja2'],
++    tests_require=['nose', 'fudge', 'jinja2'],
+     install_requires=install_requires,
+     entry_points={
+         'console_scripts': [

@@ -1,0 +1,144 @@
+diff --git a/classes/class_db.php b/classes/class_db.php
+index 3a6a65a..81e741e 100755
+--- a/classes/class_db.php
++++ b/classes/class_db.php
+@@ -13,7 +13,6 @@ class db
+     // Class wide variables
+     var $pdo;
+     var $prefix;
+-    var $insert_id;
+     var $affected_rows;
+ 
+     // Function to initialize a db connection
+@@ -92,11 +91,7 @@ function query($sql, $params = array(), $single = false)
+                     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+                 }
+             }
+-            else if (strpos($sql, 'insert') === 0)
+-            {
+-                $this->insert_id = $stmt;
+-            }
+-            else if (strpos($sql, 'update') === 0 || strpos($sql, 'delete') === 0)
++            else
+             {
+                 $this->affected_rows = $stmt->rowCount();
+             }
+@@ -109,6 +104,12 @@ function query($sql, $params = array(), $single = false)
+         }
+     }
+ 
++    // Gets the last inserted ID
++    function insert_id($column)
++    {
++        return $this->pdo->lastInsertId($column);
++    }
++
+     // Gets the database size
+     function get_size()
+     {
+diff --git a/classes/class_nav.php b/classes/class_nav.php
+index 3228d23..1399ab2 100755
+--- a/classes/class_nav.php
++++ b/classes/class_nav.php
+@@ -18,7 +18,7 @@ function __construct()
+     {
+         $this->rewrite_on = $this->check_rewrite();
+     }
+-    
++
+     // Check if mod_rewrite is enabled or not
+     function check_rewrite()
+     {
+@@ -44,7 +44,7 @@ function get($nav_key, $project = '', $page = 1, $age = '')
+             $base = $core->current_uri();
+ 
+             $arg_project = !empty($project) ? '?project=' . $project : '?';
+-            $arg_page = $page > 1 ? "&page={$page}" : ""; 
++            $arg_page = $page > 1 ? "&page={$page}" : "";
+             $arg_age = !empty($age) ? "&age={$age}" : "";
+ 
+             $rewrite_base = $core->current_uri() . (!empty($project) ? "~{$project}/" : "");
+@@ -97,7 +97,7 @@ function get($nav_key, $project = '', $page = 1, $age = '')
+     function get_paste($paste_id, $paste_key, $hash, $project, $format = '')
+     {
+         global $core, $config;
+-        
++
+         try
+         {
+             // Determine whether to use ID or key
+@@ -109,20 +109,20 @@ function get_paste($paste_id, $paste_key, $hash, $project, $format = '')
+             {
+                 $key = $paste_id;
+             }
+-            
++
+             if ($this->rewrite_on)
+             {
+                 $url = $core->current_uri() . (!empty($project) ? "~{$project}/" : "") .
+-                                           "{$key}/" .
+-                                           (!empty($hash) ? "{$hash}/" : "") .
+-                                           (!empty($format) ? "{$format}/" : "");
++                                              "{$key}/" .
++                                              (!empty($hash) ? "{$hash}/" : "") .
++                                              (!empty($format) ? "{$format}/" : "");
+             }
+             else
+             {
+                 $url = $core->current_uri() . "show.php?id={$key}" .
+-                                           (!empty($hash) ? "&hash={$hash}" : "") .
+-                                           (!empty($project) ? "&project={$project}" : "") .
+-                                           (!empty($format) ? "&mode={$format}" : "");
++                                              (!empty($hash) ? "&hash={$hash}" : "") .
++                                              (!empty($project) ? "&project={$project}" : "") .
++                                              (!empty($format) ? "&mode={$format}" : "");
+             }
+ 
+             return $url;
+diff --git a/index.php b/index.php
+index fc88607..3240581 100755
+--- a/index.php
++++ b/index.php
+@@ -23,7 +23,7 @@
+ $mode = $core->variable('mode', '');
+ $time = time();
+ $skip_insert = false;
+-$db->insert_id = 0;
++$new_id = 0;
+ 
+ if (empty($project))
+ {
+@@ -173,15 +173,18 @@
+             ':hash'         => $hash,
+             ':ip'           => $core->remote_ip()
+         ));
++
++        // Get the last inserted paste ID
++        $new_id = $db->insert_id('id');
+     }
+ 
+     // Address API requests
+     if ($mode == 'xml' || $mode == 'json')
+     {
+-        if ($db->insert_id)
++        if ($new_id)
+         {
+             $skin->assign(array(
+-                'paste_id'    => $config->url_key_enabled ? "p{$url_key}" : $db->insert_id,
++                'paste_id'    => $config->url_key_enabled ? "p{$url_key}" : $new_id,
+                 'paste_hash'  => $private ? $hash : '',
+             ));
+ 
+@@ -199,10 +202,10 @@
+     }
+     else
+     {
+-        if ($db->insert_id)
++        if ($new_id)
+         {
+             $hash_arg = ($private || $password) ? $hash : '';
+-            $url = $nav->get_paste($db->insert_id, $url_key, $hash_arg, $project);
++            $url = $nav->get_paste($new_id, $url_key, $hash_arg, $project);
+ 
+             if (!$password)
+             {

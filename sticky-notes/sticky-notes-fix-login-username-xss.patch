@@ -1,0 +1,18 @@
+--- admin/login.php.orig	2012-06-19 21:37:26.606807091 -0100
++++ admin/login.php	2012-06-19 21:38:29.380814750 -0100
+@@ -44,7 +44,7 @@
+     {
+         $banner_type = 'error';
+         $banner_visibility = 'visible';
+-        $banner_text = preg_replace('/\_\_user\_\_/', $username, $lang->get('invalid_login'));
++        $banner_text = preg_replace('/\_\_user\_\_/', htmlentities($username), $lang->get('invalid_login'));
+     }
+ }
+ 
+@@ -72,4 +72,4 @@
+ $skin->title($lang->get('admin_login') . ' &bull; ' . $lang->get('site_title'));
+ echo $skin->output(false, false, true);
+ 
+-?>
+\ No newline at end of file
++?>

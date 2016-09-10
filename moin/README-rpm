@@ -1,0 +1,67 @@
+Steps to setup Moin for your Apache server
+==========================================
+
+These instructions are only an example, please refer to the upstream-supplied
+documentation files in this package, http://moinmo.in/ and
+http://code.google.com/p/modwsgi/ for more instructions on setting up Moin and
+mod_wsgi.
+
+It's very important to read the documentation in /usr/share/doc/moin-*,
+especially when upgrading to a newer version of this package! 'rpm -qd moin'
+should give a list of the documentation files in this package.
+
+Moin is a pure WSGI application since 1.9.0, this README will guide you
+through a basic setup with Apache and mod_wsgi. Make sure you have the
+mod_wsgi package installed from the Fedora package repository. Refer to the
+Moin website for documentation about setting up Moin with FCGI/SCGI/CGI or
+with other web servers such as lighttpd.
+
+Since 1.9.0 Moin runs a server to serve the static files itself from the path
+defined in the url_prefix_static variable in wikiconfig.py.
+
+Set up a wiki instance
+----------------------
+
+First you need a wiki instance, which can be set up as follows:
+
+#!/bin/sh
+DESTDIR=/var/www/mywiki
+mkdir -p $DESTDIR
+cp -a /usr/share/moin/{data,underlay} $DESTDIR
+chown -R apache:apache $DESTDIR/{data,underlay}
+
+Set up Moin
+-----------
+
+#!/bin/sh
+DESTDIR=/var/www/mywiki
+mkdir -p $DESTDIR
+cp -a /usr/share/moin/server/moin.wsgi $DESTDIR
+cp -a /usr/share/moin/config/wikiconfig.py $DESTDIR
+cat > /etc/httpd/conf.d/mywiki.conf <<EOF
+# this is the URL http://servername/mywiki/ you will use later to invoke moin:
+WSGIScriptAlias /mywiki "$DESTDIR/moin.wsgi"
+
+# The WSGI socket needs to be somewhere Apache has access to
+WSGISocketPrefix /var/run/moin-wsgi
+
+# in case you want your wiki under the root url (http://servername/), use this instead:
+#Alias /robots.txt $DESTDIR/htdocs/robots.txt
+#Alias /favicon.ico $DESTDIR/htdocs/favicon.ico
+#WSGIScriptAlias / $DESTDIR/moin.wsgi
+
+# create some wsgi daemons:
+WSGIDaemonProcess moin user=apache group=apache processes=5 threads=10 maximum-requests=1000 umask=0007 umask=0007 display-name=wsgi-moin
+
+# use the daemons we defined above to process requests!
+WSGIProcessGroup moin
+
+# This is required if you plan to use HTTP authorization. Without it the user name won't
+# be passed to MoinMoin. 
+#WSGIPassAuthorization On
+EOF
+
+The moin.wsgi file adds $DESTDIR to the Python search path, so Python should be
+able to find wikiconfig.py automatically.
+Finally, restart Apache by doing a "service httpd restart".
+

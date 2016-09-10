@@ -1,0 +1,11 @@
+--- ratproxy-report.sh	2008-12-31 08:30:49.000000000 -0500
++++ ratproxy-report.sh.fix	2009-08-20 16:04:31.322665331 -0400
+@@ -50,7 +50,7 @@
+ <style>
+ a:link, a:visited { text-decoration: none; color: green }
+ a:hover { text-decoration: underline; color: red }
+-body { background-color: white; background-image: url('ratproxy-back.png'); background-repeat: no-repeat; }
++body { background-color: white; background-image: url('/usr/share/ratproxy/images/ratproxy-back.png'); background-repeat: no-repeat; }
+ </style>
+ </head>
+ 

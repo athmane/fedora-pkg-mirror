@@ -1,0 +1,26 @@
+diff -ru aria2-1.18.10/src/LibgnutlsTLSSession.cc aria2-1.18.10.patched/src/LibgnutlsTLSSession.cc
+--- aria2-1.18.10/src/LibgnutlsTLSSession.cc	2015-02-23 15:34:01.000000000 +0100
++++ aria2-1.18.10.patched/src/LibgnutlsTLSSession.cc	2015-02-27 19:49:13.649873035 +0100
+@@ -127,20 +127,8 @@
+   // It seems err is not error message, but the argument string
+   // which causes syntax error.
+   const char* err;
+-  std::string pri = "SECURE128";
+-  switch(tlsContext_->getMinTLSVersion()) {
+-  case TLS_PROTO_TLS12:
+-    pri += ":-VERS-TLS1.1";
+-    // fall through
+-  case TLS_PROTO_TLS11:
+-    pri += ":-VERS-TLS1.0";
+-    // fall through
+-  case TLS_PROTO_TLS10:
+-    pri += ":-VERS-SSL3.0";
+-  default:
+-    break;
+-  };
+-  rv_ = gnutls_priority_set_direct(sslSession_, pri.c_str(), &err);
++  rv_ = gnutls_priority_set_direct(sslSession_, "@SYSTEM", &err);
++
+   if(rv_ != GNUTLS_E_SUCCESS) {
+     return TLS_ERR_ERROR;
+   }

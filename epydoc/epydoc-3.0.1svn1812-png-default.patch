@@ -1,0 +1,12 @@
+diff -ru epydoc-code.orig/epydoc/src/epydoc/docwriter/dotgraph.py epydoc-code/epydoc/src/epydoc/docwriter/dotgraph.py
+--- epydoc-code.orig/epydoc/src/epydoc/docwriter/dotgraph.py	2015-10-02 20:18:48.213890123 +0100
++++ epydoc-code/epydoc/src/epydoc/docwriter/dotgraph.py	2015-10-02 20:33:00.582257332 +0100
+@@ -93,7 +93,7 @@
+     """The default minimum size in inches (width,height) for graphs
+     when rendering with `to_html()`"""
+     
+-    DEFAULT_HTML_IMAGE_FORMAT = 'gif'
++    DEFAULT_HTML_IMAGE_FORMAT = 'png'
+     """The default format used to generate images by `to_html()`"""
+     
+     def __init__(self, title, body='', node_defaults=None,

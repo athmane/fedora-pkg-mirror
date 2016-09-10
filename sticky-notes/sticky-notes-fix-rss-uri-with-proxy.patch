@@ -1,0 +1,30 @@
+diff -ru sticky-notes.orig/classes/class_core.php sticky-notes/classes/class_core.php
+--- sticky-notes.orig/classes/class_core.php	2012-10-12 21:58:07.510498928 -0100
++++ sticky-notes/classes/class_core.php	2012-10-12 21:58:59.946486810 -0100
+@@ -147,7 +147,18 @@
+     function base_uri()
+     {
+         $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https' : 'http';
+-        $uri = $protocol . '://' . $_SERVER['HTTP_HOST'] . $this->path();
++        
++        if (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) {
++            $hostname = $_SERVER['HTTP_X_FORWARDED_HOST'];
++        }
++        elseif (isset($_SERVER['HTTP_HOST'])) {
++            $hostname = $_SERVER['HTTP_HOST'];
++        }
++        else {
++            $hostname = "unknown_host";
++        }
++
++        $uri = $protocol . '://' . $hostname . $this->path();
+         
+         return $uri;
+     }
+@@ -220,4 +231,4 @@
+     }    
+ }
+ 
+-?>
+\ No newline at end of file
++?>

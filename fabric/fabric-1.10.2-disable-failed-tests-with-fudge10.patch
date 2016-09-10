@@ -1,0 +1,111 @@
+diff -ru Fabric-1.10.2.orig/tests/test_utils.py Fabric-1.10.2/tests/test_utils.py
+--- Fabric-1.10.2.orig/tests/test_utils.py	2015-06-20 16:58:32.098110027 +0100
++++ Fabric-1.10.2/tests/test_utils.py	2015-06-20 17:19:39.300356991 +0100
+@@ -18,16 +18,6 @@
+     assert_not_contains
+ 
+ 
+-@mock_streams('stderr')
+-@with_patched_object(output, 'warnings', True)
+-def test_warn():
+-    """
+-    warn() should print 'Warning' plus given text
+-    """
+-    warn("Test")
+-    eq_("\nWarning: Test\n\n", sys.stderr.getvalue())
+-
+-
+ def test_indent():
+     for description, input, output in (
+         ("Sanity check: 1 line string",
+@@ -73,45 +63,6 @@
+     with settings(abort_exception=TestException):
+         abort("Test")
+ 
+-@mock_streams('stderr')
+-@with_patched_object(output, 'aborts', True)
+-def test_abort_message():
+-    """
+-    abort() should print 'Fatal error' plus exception value
+-    """
+-    try:
+-        abort("Test")
+-    except SystemExit:
+-        pass
+-    result = sys.stderr.getvalue()
+-    eq_("\nFatal error: Test\n\nAborting.\n", result)
+-
+-def test_abort_message_only_printed_once():
+-    """
+-    abort()'s SystemExit should not cause a reprint of the error message
+-    """
+-    # No good way to test the implicit stderr print which sys.exit/SystemExit
+-    # perform when they are allowed to bubble all the way to the top. So, we
+-    # invoke a subprocess and look at its stderr instead.
+-    with quiet():
+-        result = local("fab -f tests/support/aborts.py kaboom", capture=True)
+-    # When error in #1318 is present, this has an extra "It burns!" at end of
+-    # stderr string.
+-    eq_(result.stderr, "Fatal error: It burns!\n\nAborting.")
+-
+-@mock_streams('stderr')
+-@with_patched_object(output, 'aborts', True)
+-def test_abort_exception_contains_separate_message_and_code():
+-    """
+-    abort()'s SystemExit contains distinct .code/.message attributes.
+-    """
+-    # Re #1318 / #1213
+-    try:
+-        abort("Test")
+-    except SystemExit as e:
+-        eq_(e.message, "Test")
+-        eq_(e.code, 1)
+-
+ @mock_streams('stdout')
+ def test_puts_with_user_output_on():
+     """
+@@ -229,44 +180,6 @@
+             error("error message", func=utils.abort, stdout=stdout)
+         assert_contains(stdout, sys.stdout.getvalue())
+ 
+-    @mock_streams('stdout')
+-    @with_patched_object(utils, 'abort', Fake('abort', callable=True,
+-        expect_call=True).calls(lambda x: sys.stdout.write(x + "\n")))
+-    @with_patched_object(output, 'exceptions', True)
+-    @with_patched_object(utils, 'format_exc', Fake('format_exc', callable=True,
+-        expect_call=True).returns(dummy_string))
+-    def test_includes_traceback_if_exceptions_logging_is_on(self):
+-        """
+-        error() includes traceback in message if exceptions logging is on
+-        """
+-        error("error message", func=utils.abort, stdout=error)
+-        assert_contains(self.dummy_string, sys.stdout.getvalue())
+-
+-    @mock_streams('stdout')
+-    @with_patched_object(utils, 'abort', Fake('abort', callable=True,
+-        expect_call=True).calls(lambda x: sys.stdout.write(x + "\n")))
+-    @with_patched_object(output, 'debug', True)
+-    @with_patched_object(utils, 'format_exc', Fake('format_exc', callable=True,
+-        expect_call=True).returns(dummy_string))
+-    def test_includes_traceback_if_debug_logging_is_on(self):
+-        """
+-        error() includes traceback in message if debug logging is on (backwardis compatibility)
+-        """
+-        error("error message", func=utils.abort, stdout=error)
+-        assert_contains(self.dummy_string, sys.stdout.getvalue())
+-
+-    @mock_streams('stdout')
+-    @with_patched_object(utils, 'abort', Fake('abort', callable=True,
+-        expect_call=True).calls(lambda x: sys.stdout.write(x + "\n")))
+-    @with_patched_object(output, 'exceptions', True)
+-    @with_patched_object(utils, 'format_exc', Fake('format_exc', callable=True,
+-        expect_call=True).returns(None))
+-    def test_doesnt_print_None_when_no_traceback_present(self):
+-        """
+-        error() doesn't include None in message if there is no traceback
+-        """
+-        error("error message", func=utils.abort, stdout=error)
+-        assert_not_contains('None', sys.stdout.getvalue())
+ 
+     @mock_streams('stderr')
+     @with_patched_object(utils, 'abort', Fake('abort', callable=True,

@@ -1,0 +1,54 @@
+commit b583a7451e38f2ec8bc6b609d4a34f603dac5697
+Author: Giampaolo Rodola <g.rodola@gmail.com>
+Date:   Sat Jul 5 11:14:27 2014 +0200
+
+    fix #302: setup.py should not require pysendfile on Python >= 3.3.
+
+diff --git a/Makefile b/Makefile
+index 55225cd..97cc545 100644
+--- a/Makefile
++++ b/Makefile
+@@ -69,3 +69,4 @@ upload-docs:
+ # git-tag a new release
+ git-tag-release:
+ 	git tag -a release-`python -c "import setup; print(setup.VERSION)"` -m `git rev-list HEAD --count`:`git rev-parse --short HEAD`
++	@echo "now run 'git push --tags'"
+diff --git a/setup.py b/setup.py
+index 7c186ea..970b981 100644
+--- a/setup.py
++++ b/setup.py
+@@ -91,6 +91,13 @@ def hilite(s, ok=True, bold=False):
+ if sys.version_info < (2, 4):
+     sys.exit('python version not supported (min 2.4)')
+ 
++require_pysendfile = (os.name == 'posix' and sys.version_info >= (2, 5)
++                      and sys.version_info < (3, 3))
++
++extras_require = {'ssl': ["PyOpenSSL"]}
++if require_pysendfile:
++    extras_require.update({'sendfile': ['pysendfile']})
++
+ VERSION = get_version()
+ 
+ 
+@@ -110,10 +117,7 @@ def main():
+                   'sendfile', 'asynchronous', 'nonblocking', 'eventdriven',
+                   'rfc959', 'rfc1123', 'rfc2228', 'rfc2428', 'rfc2640',
+                   'rfc3659'],
+-        extras_require={
+-            'ssl': ["PyOpenSSL"],
+-            'sendfile': ["pysendfile"],
+-        },
++        extras_require=extras_require,
+         classifiers=[
+             'Development Status :: 5 - Production/Stable',
+             'Environment :: Console',
+@@ -141,7 +145,7 @@ def main():
+     )
+ 
+     # suggest to install pysendfile
+-    if os.name == 'posix' and sys.version_info >= (2, 5):
++    if require_pysendfile:
+         try:
+             # os.sendfile() appeared in python 3.3
+             # http://bugs.python.org/issue10882

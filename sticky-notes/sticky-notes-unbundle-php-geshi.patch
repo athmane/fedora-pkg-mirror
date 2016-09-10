@@ -1,0 +1,49 @@
+diff -ru sticky-notes-master.orig/init.php sticky-notes-master/init.php
+--- sticky-notes-master.orig/init.php	2013-04-14 10:13:06.634372031 +0100
++++ sticky-notes-master/init.php	2013-04-14 10:10:49.755089332 +0100
+@@ -25,7 +25,7 @@
+ include_once('classes/class_nav.php');
+ include_once('classes/class_spamguard.php');
+ include_once('classes/class_urlshort.php');
+-include_once('addons/geshi/geshi.php');
++include_once('geshi.php');
+ 
+ // We need to instantiate the GSoD class first, just in case!
+ $gsod = new gsod();
+@@ -52,7 +52,7 @@
+ }
+ 
+ // Define macros
+-define('GESHI_LANG_PATH', $core->base_uri() . '/addons/geshi/geshi/');
++define('GESHI_LANG_PATH', $core->base_uri() . '/usr/share/php/geshi/');
+ 
+ // Before we do anything, let's add a trailing slash
+ // We skip this for admin links
+diff -ru sticky-notes-master.orig/list.php sticky-notes-master/list.php
+--- sticky-notes-master.orig/list.php	2013-04-14 10:07:33.740688215 +0100
++++ sticky-notes-master/list.php	2013-04-14 10:11:39.674192189 +0100
+@@ -104,8 +104,8 @@
+     $geshi = new GeSHi($row['data'], $row['language']);
+     $geshi->enable_line_numbers(GESHI_FANCY_LINE_NUMBERS, 2);
+     $geshi->set_header_type(GESHI_HEADER_DIV);
+-    $geshi->set_line_style('background: #f7f7f7; text-shadow: 0px 1px #fff; padding: 1px;',
+-                           'background: #fbfbfb; text-shadow: 0px 1px #fff; padding: 1px;');
++    //$geshi->set_line_style('background: #f7f7f7; text-shadow: 0px 1px #fff; padding: 1px;',
++    //                       'background: #fbfbfb; text-shadow: 0px 1px #fff; padding: 1px;');
+     $geshi->set_overall_style('word-wrap:break-word;');
+ 
+     // Generate the data
+diff -ru sticky-notes-master.orig/show.php sticky-notes-master/show.php
+--- sticky-notes-master.orig/show.php	2013-04-14 10:13:06.636372035 +0100
++++ sticky-notes-master/show.php	2013-04-14 10:11:18.302148118 +0100
+@@ -210,8 +210,8 @@
+ $geshi = new GeSHi($row['data'], $row['language']);
+ $geshi->enable_line_numbers(GESHI_FANCY_LINE_NUMBERS, 2);
+ $geshi->set_header_type(GESHI_HEADER_DIV);
+-$geshi->set_line_style('background: #f7f7f7; text-shadow: 0px 1px #fff; padding: 1px;',
+-                       'background: #fbfbfb; text-shadow: 0px 1px #fff; padding: 1px;');
++//$geshi->set_line_style('background: #f7f7f7; text-shadow: 0px 1px #fff; padding: 1px;',
++//                       'background: #fbfbfb; text-shadow: 0px 1px #fff; padding: 1px;');
+ $geshi->set_overall_style('word-wrap:break-word;');
+ 
+ // Generate the data

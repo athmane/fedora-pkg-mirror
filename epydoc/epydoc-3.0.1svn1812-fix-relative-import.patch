@@ -1,0 +1,17 @@
+--- epydoc/docparser.py.orig	2011-05-30 13:26:50.000000000 +0100
++++ epydoc/docparser.py	2011-05-30 13:52:54.000000000 +0100
+@@ -860,7 +860,13 @@
+ 
+     # >>> from sys import *
+     elif rhs == [(token.OP, '*')]:
+-        src_name = parse_dotted_name(lhs)
++        # Allow relative imports in this case, as per PEP 328
++        # e.g. from .foo import *
++        if (lhs[0] == (token.OP, '.')):
++            src_name = parse_dotted_name(lhs,
++                parent_name=parent_docs[-1].canonical_name)
++        else:
++            src_name = parse_dotted_name(lhs)
+         _process_fromstar_import(src_name, parent_docs)
+ 
+     # >>> from os.path import join, split

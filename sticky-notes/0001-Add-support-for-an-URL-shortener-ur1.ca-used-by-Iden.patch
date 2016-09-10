@@ -1,0 +1,170 @@
+From 79c2f64b46450eca76fd307759055e5ded2cd94f Mon Sep 17 00:00:00 2001
+From: Athmane Madjoudj <athmane@fedoraproject.org>
+Date: Sun, 14 Apr 2013 08:57:13 +0100
+Subject: [PATCH] Add support for an URL shortener (ur1.ca used by Identi.ca)
+
+---
+ api/api_show.json                  |  5 +++--
+ api/api_show.xml                   |  3 ++-
+ classes/class_urlshort.php         | 38 ++++++++++++++++++++++++++++++++++++++
+ init.php                           |  3 ++-
+ install.php                        |  2 +-
+ show.php                           |  6 ++++++
+ skins/bootstrap/html/tpl_show.html |  3 ++-
+ 7 files changed, 54 insertions(+), 6 deletions(-)
+ create mode 100644 classes/class_urlshort.php
+
+diff --git a/api/api_show.json b/api/api_show.json
+index d73eac1..cf2dbf8 100755
+--- a/api/api_show.json
++++ b/api/api_show.json
+@@ -5,6 +5,7 @@
+         "author": "[[paste_user]]",
+         "timestamp": "[[paste_timestamp]]",
+         "language": "[[paste_lang]]",
+-        "data": "[[paste_data]]"
++        "data": "[[paste_data]]",
++        "short_url": "[[short_url]]"
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/api/api_show.xml b/api/api_show.xml
+index 24a70c5..931bff1 100755
+--- a/api/api_show.xml
++++ b/api/api_show.xml
+@@ -5,4 +5,5 @@
+     <timestamp>[[paste_timestamp]]</timestamp>
+     <language>[[paste_lang]]</language>
+     <data>[[paste_data]]</data>
+-</result>
+\ No newline at end of file
++    <shorturl>[[short_url]]</shorturl>
++</result>
+diff --git a/classes/class_urlshort.php b/classes/class_urlshort.php
+new file mode 100644
+index 0000000..0d83b9b
+--- /dev/null
++++ b/classes/class_urlshort.php
+@@ -0,0 +1,38 @@
++<?php
++/**
++* Sticky Notes pastebin
++* @ver 0.3
++* @license BSD License - www.opensource.org/licenses/bsd-license.php
++*
++* Copyright (c) 2012 Sayak Banerjee <sayakb@kde.org>
++* Copyright (c) 2013 Athmane Madjoudj <athmane@fedoraproject.org>
++* All rights reserved. Do not remove this copyright notice.
++*/
++
++/**
++ * URL shortener using ur1.ca from Indenti.ca
++ **/
++class URLShortener
++{
++    public function shorten($long_url)
++    {
++        $ch = curl_init();
++        curl_setopt($ch, CURLOPT_URL,"http://ur1.ca/");
++        curl_setopt($ch, CURLOPT_POST, 1); 
++        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array('longurl' => $long_url)));
++        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
++        $result = curl_exec($ch);
++        curl_close($ch);
++        preg_match( '/<p class="success">Your ur1 is: <a href="(.+)">(.+)<\/a><\/p>/', $result, $match );
++        if (!empty($match)) 
++            return $match[1];
++        else
++            return false;
++
++    }
++}
++
++//$u2 = new URLShortener();
++//print $u2->shorten("http://google.com/");
++
++?>
+diff --git a/init.php b/init.php
+index 285c976..075f22a 100755
+--- a/init.php
++++ b/init.php
+@@ -24,6 +24,7 @@ include_once('classes/class_skin.php');
+ include_once('classes/class_api.php');
+ include_once('classes/class_nav.php');
+ include_once('classes/class_spamguard.php');
++include_once('classes/class_urlshort.php');
+ include_once('addons/geshi/geshi.php');
+ 
+ // We need to instantiate the GSoD class first, just in case!
+@@ -88,4 +89,4 @@ if (!defined('IN_INSTALL') && !defined('IN_ADMIN'))
+     include_once('cron.php');
+ }
+ 
+-?>
+\ No newline at end of file
++?>
+diff --git a/install.php b/install.php
+index 9536460..2f57720 100755
+--- a/install.php
++++ b/install.php
+@@ -133,4 +133,4 @@ $gsod->trigger(
+     "the <a href=\"../admin/\">admin panel</a>."
+ );
+ 
+-?>
+\ No newline at end of file
++?>
+diff --git a/show.php b/show.php
+index 1ffa885..a31a750 100755
+--- a/show.php
++++ b/show.php
+@@ -5,6 +5,7 @@
+ * @license BSD License - www.opensource.org/licenses/bsd-license.php
+ *
+ * Copyright (c) 2012 Sayak Banerjee <sayakb@kde.org>
++* Copyright (c) 2013 Athmane Madjoudj <athmane@fedoraproject.org>
+ * All rights reserved. Do not remove this copyright notice.
+ */
+ 
+@@ -227,6 +228,10 @@ $code_data = (empty($mode) ? $geshi->parse_code() : htmlspecialchars($row['data'
+ $lang->escape($code_data);
+ $skin->escape($code_data);
+ 
++// Shorten the current URL
++$url_shortener = new URLShortener();
++$short_url = $url_shortener->shorten($nav->get_paste($row['id'], $hash, $project, true, ''));
++
+ // Assign template variables
+ $skin->assign(array(
+     'paste_id'          => $row['id'],
+@@ -240,6 +245,7 @@ $skin->assign(array(
+     'share_title'       => urlencode($lang->get('paste') . ' #' . $row['id']),
+     'error_visibility'  => 'hidden',
+     'geshi_stylesheet'  => $geshi->get_stylesheet(),
++    'short_url'         => $short_url,
+ ));
+ 
+ // Let's output the page now
+diff --git a/skins/bootstrap/html/tpl_show.html b/skins/bootstrap/html/tpl_show.html
+index a58386b..c6776bc 100755
+--- a/skins/bootstrap/html/tpl_show.html
++++ b/skins/bootstrap/html/tpl_show.html
+@@ -34,6 +34,7 @@
+             <a href="http://technorati.com/faves?add=[[share_url]]">
+                 <img src="[[skin_path]]/images/technorati.png" alt="" title="Technorati" />
+             </a>
++	    <strong>Shortened URL</strong>: <a href="[[short_url]]">[[short_url]]</a>
+         </div>
+     
+         <hr />
+@@ -51,4 +52,4 @@
+     <div class="error">
+         <h1>[[error_text]]</h1>
+     </div>
+-</div>
+\ No newline at end of file
++</div>
+-- 
+1.8.1.4
+

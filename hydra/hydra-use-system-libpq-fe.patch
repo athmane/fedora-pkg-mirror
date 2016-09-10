@@ -1,0 +1,12 @@
+--- hydra-postgres.c.orig	2012-05-18 22:17:20.839998208 +0100
++++ hydra-postgres.c	2012-05-18 22:19:36.546989957 +0100
+@@ -14,7 +14,8 @@
+ }
+ #else
+ 
+-#include "libpq-fe.h"           // Postgres connection functions
++/* Postgres connection functions */
++#include <libpq-fe.h>    
+ #include <stdio.h>
+ 
+ #define DEFAULT_DB "template1"

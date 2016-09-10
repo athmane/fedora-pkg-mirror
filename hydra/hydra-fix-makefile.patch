@@ -1,0 +1,32 @@
+--- Makefile.am.orig	2014-05-25 22:02:41.116000000 +0100
++++ Makefile.am	2014-05-25 22:05:55.592000000 +0100
+@@ -52,20 +52,21 @@
+ .c.o:	
+ 	$(CC) $(OPTS) $(SEC) $(CFLAGS) $(CPPFLAGS) -c $< $(XDEFINES) $(XIPATHS)
+ 
+-strip:	all
+-	strip $(BINS)
+-	-echo OK > /dev/null && test -x xhydra && strip xhydra || echo OK > /dev/null
++#strip:	all
++#	strip $(BINS)
++#	-echo OK > /dev/null && test -x xhydra && strip xhydra || echo OK > /dev/null
+ 
+-install:	strip
++install:
+ 	-mkdir -p $(PREFIX)$(DIR)
+ 	cp -f hydra-wizard.sh $(BINS) $(PREFIX)$(DIR) && cd $(PREFIX)$(DIR) && chmod 755 hydra-wizard.sh $(BINS)
+ 	-echo OK > /dev/null && test -x xhydra && cp xhydra $(PREFIX)$(DIR) && cd $(PREFIX)$(DIR) && chmod 755 xhydra || echo OK > /dev/null
+ 	-sed -e "s|^INSTALLDIR=.*|INSTALLDIR="$(PREFIX)"|" dpl4hydra.sh > $(PREFIX)/bin/dpl4hydra.sh
+ 	-chmod 755 $(PREFIX)/bin/dpl4hydra.sh
+-	-mkdir -p $(PREFIX)/etc/
+-	-cp -f *.csv $(PREFIX)/etc/
+-	-mkdir -p $(PREFIX)/man/man1
+-	-cp -f hydra.1 xhydra.1 pw-inspector.1 $(PREFIX)/man/man1
++	-mkdir -p $(PREFIX)/share/hydra
++	-cp -f *.csv $(PREFIX)/share/hydra
++	-mkdir -p $(PREFIX)/share/man/man1
++	-cp -f hydra.1 xhydra.1 pw-inspector.1 $(PREFIX)/share/man/man1
++
+ 
+ clean:
+ 	rm -rf xhydra pw-inspector hydra *.o core *.core *.stackdump *~ Makefile.in Makefile dev_rfc hydra.restore arm/*.ipk arm/ipkg/usr/bin/* hydra-gtk/src/*.o hydra-gtk/src/xhydra hydra-gtk/stamp-h hydra-gtk/config.status hydra-gtk/errors hydra-gtk/config.log hydra-gtk/src/.deps hydra-gtk/src/Makefile hydra-gtk/Makefile
